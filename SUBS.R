@@ -17,176 +17,196 @@
 
 library(methods)
 
-setGeneric("name", valueClass = "character", function(self) {
-    standardGeneric("name")
-})
-setGeneric("currentSpeed", valueClass = "numeric", function(self) {
-    standardGeneric("currentSpeed")
-})
-setGeneric("buoyancy", valueClass = "numeric", function(self) {
-    standardGeneric("buoyancy")
-})
-setGeneric("dragCoeff", valueClass = "numeric", function(object) {
-    standardGeneric("dragCoeff")
-})
-setGeneric("height", valueClass = "numeric", function(object) {
-    standardGeneric("height")
-})
-setGeneric("lineLength", valueClass = "numeric", function(object) {
-    standardGeneric("lineLength")
-})
-setGeneric("lineUpLoad", valueClass = "numeric", function(self) {
-    standardGeneric("lineUpLoad")
-})
-setGeneric("lineTheta", valueClass = "numeric", function(self) {
-    standardGeneric("lineTheta")
-})
-setGeneric("lineDownLoad", valueClass = "numeric", function(self) {
-    standardGeneric("lineDownLoad")
-})
-setGeneric("linePhi", valueClass = "numeric", function(self) {
-    standardGeneric("linePhi")
-})
-setGeneric("deltaY", valueClass = "numeric", function(self) {
-    standardGeneric("deltaY")
-})
+#==========================================================
+# TODO(Mackessy-Lloyd): Get more specific details on the kinds of line
+#   currently in use. Cross-sections and materials.
+# TODO(Mackessy-Lloyd): What additional components should be assessed?
+#   Shackles, swivels, etc.?
+# TODO(Mackessy-Lloyd): Convert to R Markdown file and develop Shiny front-end.
+# TODO(Mackessy-Lloyd): Migrate from plot to ggplot2. Enhance plots.
 
-
+#==========================================================
 # Generic class containing slots common to all parts of a SUBS mooring line
 setClass("Element",
-         slots = list(
-             name         = "character", # descriptive name
-             buoyancy     = "numeric",   # (N)
-             currentSpeed = "numeric",   # (knots)
-             lineUpLoad   = "numeric",   # mooring line load above this Element
-             theta        = "numeric",   # vertical angle of lineUpLoad
-             lineDownLoad = "numeric",   # mooring line load below this Element
-             phi          = "numeric",   # vertical angle of lineDownLoad
-             deltaY       = "numeric")   # vertical depression
-)
+         slots = c(name         = "character", # descriptive name
+                   buoyancy     = "numeric",   # (N)
+                   currentSpeed = "numeric",   # (knots)
+                   lineUpLoad   = "numeric",   # line load above this Element
+                   theta        = "numeric",   # vertical angle of lineUpLoad
+                   lineDownLoad = "numeric",   # line load below this Element
+                   phi          = "numeric",   # vertical angle of lineDownLoad
+                   deltaY       = "numeric"))  # vertical depression
 
-#==================================================
+#==========================================================
 # Subclasses for "Component" (A2, B3, etc.)
 setClass("Component",
-         slots = list(
-             drag      = "numeric",   # (N)
-             dragCoeff = "numeric",
-             height    = "numeric"),
+         slots = c(drag      = "numeric",   # (N)
+                   dragCoeff = "numeric",
+                   height    = "numeric"),  # (m)
          contains = "Element")
 
+#----------------------------------------------------------
 setClass("A2",
          contains = "Component",
-         prototype = list(
-           buoyancy  = 320.00,
-           dragCoeff = 75.30,
-           height    = 0.70))
+         prototype = list(buoyancy  =  320.0,
+                          dragCoeff =   75.3,
+                          height    =    0.7))
 setClass("A2+",
          contains = "Component",
-         prototype = list(
-           buoyancy  = 490.00,
-           dragCoeff = 75.30,
-           height    = 0.70))
+         prototype = list(buoyancy  =  490.0,
+                          dragCoeff =   75.3,
+                          height    =    0.7))
 setClass("B3",
          contains = "Component",
-         prototype = list(
-           buoyancy  = 512.00,
-           dragCoeff = 63.50,
-           height    = 0.70))
+         prototype = list(buoyancy  =  512.0,
+                          dragCoeff =   63.5,
+                          height    =    0.7))
 setClass("CART",
          contains = "Component",
-         prototype = list(
-           buoyancy  = -111.00,
-           dragCoeff = 33.40,
-           height    = 0.80))
+         prototype = list(buoyancy  = -111.0,
+                          dragCoeff =   33.4,
+                          height    =    0.8))
 setClass("CROM",
          contains = "Component",
-         prototype = list(
-           buoyancy  = 320.00,
-           dragCoeff = 0.47,
-           height    = 0.58))
+         prototype = list(buoyancy  =  320.0,
+                          dragCoeff =    0.47,
+                          height    =    0.58))
 setClass("D2",
          contains = "Component",
-         prototype = list(
-           buoyancy  = 900.00,
-           dragCoeff = 100.0,
-           height    = 0.80))
+         prototype = list(buoyancy  =  900.0,
+                          dragCoeff =  100.0,
+                          height    =    0.8))
 setClass("Glass Float",
          contains = "Component",
-         prototype = list(
-           buoyancy  = 169.00,
-           dragCoeff = 25.20,
-           height    = 0.60))
+         prototype = list(buoyancy  =  169.0,
+                          dragCoeff =   25.2,
+                          height    =    0.6))
 setClass("SBE37-SMP",
          contains = "Component",
-         prototype = list(
-           buoyancy  = -35.00,
-           dragCoeff = 3.170,
-           height    = 0.00))
+         prototype = list(buoyancy  =  -35.0,
+                          dragCoeff =    3.17,
+                          height    =    0.0))
 
-#==================================================
-# Subclass for "Line" (chain or wire)
+#==========================================================
+# Subclasses for "Line" (chain or wire)
 setClass("Line",
-         slots = list(
-             drag      = "numeric",   # (N)
-             dragCoeff = "numeric",
-             length    = "numeric"),
+         slots = c(drag      = "numeric",   # (N)
+                   dragCoeff = "numeric",
+                   length    = "numeric"),  # (m)
          contains = "Element")
 
-setClass("1/4 In Wire",  contains = "Line")
-setClass("5/16 In Wire", contains = "Line")
-setClass("Chain",        contains = "Line")
+#----------------------------------------------------------
+setClass("1/4 In Wire",
+         contains = "Line",
+         prototype = list(buoyancy  =  -2.0,
+                          dragCoeff =   3.17))
+setClass("5/16 In Wire",
+         contains = "Line",
+         prototype = list(buoyancy  =  -3.0,
+                          dragCoeff =   4.0))
+setClass("Chain",
+         contains = "Line",
+         prototype = list(buoyancy  = -23.0,
+                          dragCoeff =   4.0))
 
-setMethod("buoyancy", signature("1/4 In Wire"),  function(self)  -2.00)
-setMethod("buoyancy", signature("5/16 In Wire"), function(self)  -3.00)
-setMethod("buoyancy", signature("Chain"),        function(self) -23.00)
-
-setMethod("dragCoeff", signature("1/4 In Wire"),  function(object) 3.17)
-setMethod("dragCoeff", signature("5/16 In Wire"), function(object) 4.00)
-setMethod("dragCoeff", signature("Chain"),        function(object) 4.00)
-
-#==================================================
-# Subclass for "Anchor" (railroad wheels, etc.)
+#==========================================================
+# Subclasses for "Anchor" (railroad wheels, etc.)
 setClass("Anchor",
-         slots = list(height = "numeric"),
+         slots = c(height = "numeric"),  # (m)
          contains = "Element")
 
-setClass("Single Railroad", contains = "Component")
-setClass("Dual Railroad",   contains = "Component")
-setClass("50 LBS",          contains = "Component")
-setClass("100 LBS",         contains = "Component")
-setClass("200 LBS",         contains = "Component")
-setClass("300 LBS",         contains = "Component")
-setClass("500 LBS",         contains = "Component")
+#----------------------------------------------------------
+setClass("Single Railroad",
+         contains = "Anchor",
+         prototype = list(buoyancy = -2890.0,
+                          height   =     0.3))
+setClass("Dual Railroad",
+         contains = "Anchor",
+         prototype = list(buoyancy = -5785.0,
+                          height   =     0.3))
+setClass("50 LBS",
+         contains = "Anchor",
+         prototype = list(buoyancy =  -222.0,
+                          height   =     0.2))
+setClass("100 LBS",
+         contains = "Anchor",
+         prototype = list(buoyancy =  -444.0,
+                          height   =     0.2))
+setClass("200 LBS",
+         contains = "Anchor",
+         prototype = list(buoyancy =  -889.0,
+                          height   =     0.2))
+setClass("300 LBS",
+         contains = "Anchor",
+         prototype = list(buoyancy = -1334.0,
+                          height   =     0.2))
+setClass("500 LBS",
+         contains = "Anchor",
+         prototype = list(buoyancy = -2224.0,
+                          height   =     0.2))
 
-setMethod("buoyancy", signature("Single Railroad"), function(self) -2890.00)
-setMethod("buoyancy", signature("Dual Railroad"),   function(self) -5785.00)
-setMethod("buoyancy", signature("50 LBS"),          function(self)  -222.00)
-setMethod("buoyancy", signature("100 LBS"),         function(self)  -444.00)
-setMethod("buoyancy", signature("200 LBS"),         function(self)  -889.00)
-setMethod("buoyancy", signature("300 LBS"),         function(self) -1334.00)
-setMethod("buoyancy", signature("500 LBS"),         function(self) -2224.00)
+#==========================================================
+# Drag Calculation
+setGeneric("drag",
+           valueClass = "numeric",
+           function(self) {
+             standardGeneric("drag")
+             }
+           )
+setMethod("drag",
+          signature = "Component",
+          function(self) {
+            currentSpeed = self@currentSpeed * 0.514
+            drag = self@dragCoeff * currentSpeed ^ 2
+            return(drag)
+            }
+          )
+setMethod("drag",
+          signature = "Line",
+          function(self) {
+            currentSpeed = self@currentSpeed * 0.514
+            drag = self@length * self@dragCoeff * currentSpeed ^ 2
+            return(drag)
+            }
+          )
 
-setMethod("height", signature("Single Railroad"), function(object) 0.30)
-setMethod("height", signature("Dual Railroad"),   function(object) 0.30)
-setMethod("height", signature("50 LBS"),          function(object) 0.20)
-setMethod("height", signature("100 LBS"),         function(object) 0.20)
-setMethod("height", signature("200 LBS"),         function(object) 0.20)
-setMethod("height", signature("300 LBS"),         function(object) 0.20)
-setMethod("height", signature("500 LBS"),         function(object) 0.20)
+#==========================================================
+# Loading & Resultant Angle Calculation
+setGeneric("lineUpLoad",
+           valueClass = "numeric",
+           function(self) {
+             standardGeneric("lineUpLoad")
+             }
+           )
+setMethod("lineUpLoad",
+          signature = "Element",
+          function(self) {
+            
+          })
+setGeneric("lineTheta",
+           valueClass = "numeric",
+           function(self) {
+             standardGeneric("lineTheta")
+             }
+           )
+setGeneric("lineDownLoad",
+           valueClass = "numeric",
+           function(self) {
+             standardGeneric("lineDownLoad")
+             }
+           )
+setGeneric("linePhi",
+           valueClass = "numeric",
+           function(self) {
+             standardGeneric("linePhi")
+             }
+           )
 
-#==================================================
-# Drag calculations
-setGeneric("drag", valueClass = "numeric", function(self) {
-    standardGeneric("drag")
-})
-
-setMethod("drag", signature = "Component", function(self) {
-    currentSpeed = self@currentSpeed * 0.514
-    drag = self@dragCoeff * currentSpeed ^ 2
-    return(drag)
-})
-setMethod("drag", signature = "Line", function(self) {
-    currentSpeed = self@currentSpeed * 0.514
-    drag = self@length * self@dragCoeff * currentSpeed ^ 2
-    return(drag)
-})
+#==========================================================
+# Depression Calculation
+setGeneric("deltaY",
+           valueClass = "numeric",
+           function(self) {
+             standardGeneric("deltaY")
+             }
+           )
