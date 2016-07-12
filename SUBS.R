@@ -1,9 +1,3 @@
-#==========================================================
-# Credit to Joseph Park for his work on the original
-# TRBM and SUBS classes.
-# I am hoping this is a worthy "2.0".
-# ~ Trevor Mackessy-Lloyd
-#==========================================================
 
 #==========================================================
 # class Element
@@ -29,7 +23,7 @@ setGeneric("name", valueClass = "character", function(self) {
 setGeneric("currentSpeed", valueClass = "numeric", function(self) {
     standardGeneric("currentSpeed")
 })
-setGeneric("buoyancy", valueClass = "numeric", function(object) {
+setGeneric("buoyancy", valueClass = "numeric", function(self) {
     standardGeneric("buoyancy")
 })
 setGeneric("dragCoeff", valueClass = "numeric", function(object) {
@@ -80,44 +74,54 @@ setClass("Component",
              height    = "numeric"),
          contains = "Element")
 
-setClass("A2",          contains = "Component")
-setClass("A2+",         contains = "Component")
-setClass("B3",          contains = "Component")
-setClass("CART",        contains = "Component")
-setClass("CROM",        contains = "Component")
-setClass("D2",          contains = "Component")
-setClass("Glass Float", contains = "Component")
-setClass("SBE37-SMP",   contains = "Component")
-
-# Set up buoyancies for each subclass
-setMethod("buoyancy", signature("A2"),          function(object)  320.00)
-setMethod("buoyancy", signature("A2+"),         function(object)  490.00)
-setMethod("buoyancy", signature("B3"),          function(object)  512.00)
-setMethod("buoyancy", signature("CART"),        function(object) -111.00)
-setMethod("buoyancy", signature("CROM"),        function(object)  320.00)
-setMethod("buoyancy", signature("D2"),          function(object)  900.00)
-setMethod("buoyancy", signature("Glass Float"), function(object)  169.00)
-setMethod("buoyancy", signature("SBE37-SMP"),   function(object)  -35.00)
-
-# Set up drag coefficients for each subclass
-setMethod("dragCoeff", signature("A2"),          function(object)  75.30)
-setMethod("dragCoeff", signature("A2+"),         function(object)  75.30)
-setMethod("dragCoeff", signature("B3"),          function(object)  63.50)
-setMethod("dragCoeff", signature("CART"),        function(object)  33.40)
-setMethod("dragCoeff", signature("CROM"),        function(object)   0.47)
-setMethod("dragCoeff", signature("D2"),          function(object) 100.00)
-setMethod("dragCoeff", signature("Glass Float"), function(object)  25.20)
-setMethod("dragCoeff", signature("SBE37-SMP"),   function(object)   3.17)
-
-# Set up heights for each subclass
-setMethod("height", signature("A2"),          function(object) 0.70)
-setMethod("height", signature("A2+"),         function(object) 0.70)
-setMethod("height", signature("B3"),          function(object) 0.70)
-setMethod("height", signature("CART"),        function(object) 0.80)
-setMethod("height", signature("CROM"),        function(object) 0.58)
-setMethod("height", signature("D2"),          function(object) 0.80)
-setMethod("height", signature("Glass Float"), function(object) 0.60)
-setMethod("height", signature("SBE37-SMP"),   function(object) 0.00)
+setClass("A2",
+         contains = "Component",
+         prototype = list(
+           buoyancy  = 320.00,
+           dragCoeff = 75.30,
+           height    = 0.70))
+setClass("A2+",
+         contains = "Component",
+         prototype = list(
+           buoyancy  = 490.00,
+           dragCoeff = 75.30,
+           height    = 0.70))
+setClass("B3",
+         contains = "Component",
+         prototype = list(
+           buoyancy  = 512.00,
+           dragCoeff = 63.50,
+           height    = 0.70))
+setClass("CART",
+         contains = "Component",
+         prototype = list(
+           buoyancy  = -111.00,
+           dragCoeff = 33.40,
+           height    = 0.80))
+setClass("CROM",
+         contains = "Component",
+         prototype = list(
+           buoyancy  = 320.00,
+           dragCoeff = 0.47,
+           height    = 0.58))
+setClass("D2",
+         contains = "Component",
+         prototype = list(
+           buoyancy  = 900.00,
+           dragCoeff = 100.0,
+           height    = 0.80))
+setClass("Glass Float",
+         contains = "Component",
+         prototype = list(
+           buoyancy  = 169.00,
+           dragCoeff = 25.20,
+           height    = 0.60))
+setClass("SBE37-SMP",
+         contains = "Component",
+         prototype = list(
+           buoyancy  = -35.00,
+           dragCoeff = 3.170,
+           height    = 0.00))
 
 #==================================================
 # Subclass for "Line" (chain or wire)
@@ -132,9 +136,9 @@ setClass("1/4 In Wire",  contains = "Line")
 setClass("5/16 In Wire", contains = "Line")
 setClass("Chain",        contains = "Line")
 
-setMethod("buoyancy", signature("1/4 In Wire"),  function(object)  -2.00)
-setMethod("buoyancy", signature("5/16 In Wire"), function(object)  -3.00)
-setMethod("buoyancy", signature("Chain"),        function(object) -23.00)
+setMethod("buoyancy", signature("1/4 In Wire"),  function(self)  -2.00)
+setMethod("buoyancy", signature("5/16 In Wire"), function(self)  -3.00)
+setMethod("buoyancy", signature("Chain"),        function(self) -23.00)
 
 setMethod("dragCoeff", signature("1/4 In Wire"),  function(object) 3.17)
 setMethod("dragCoeff", signature("5/16 In Wire"), function(object) 4.00)
@@ -154,13 +158,13 @@ setClass("200 LBS",         contains = "Component")
 setClass("300 LBS",         contains = "Component")
 setClass("500 LBS",         contains = "Component")
 
-setMethod("buoyancy", signature("Single Railroad"), function(object) -2890.00)
-setMethod("buoyancy", signature("Dual Railroad"),   function(object) -5785.00)
-setMethod("buoyancy", signature("50 LBS"),          function(object)  -222.00)
-setMethod("buoyancy", signature("100 LBS"),         function(object)  -444.00)
-setMethod("buoyancy", signature("200 LBS"),         function(object)  -889.00)
-setMethod("buoyancy", signature("300 LBS"),         function(object) -1334.00)
-setMethod("buoyancy", signature("500 LBS"),         function(object) -2224.00)
+setMethod("buoyancy", signature("Single Railroad"), function(self) -2890.00)
+setMethod("buoyancy", signature("Dual Railroad"),   function(self) -5785.00)
+setMethod("buoyancy", signature("50 LBS"),          function(self)  -222.00)
+setMethod("buoyancy", signature("100 LBS"),         function(self)  -444.00)
+setMethod("buoyancy", signature("200 LBS"),         function(self)  -889.00)
+setMethod("buoyancy", signature("300 LBS"),         function(self) -1334.00)
+setMethod("buoyancy", signature("500 LBS"),         function(self) -2224.00)
 
 setMethod("height", signature("Single Railroad"), function(object) 0.30)
 setMethod("height", signature("Dual Railroad"),   function(object) 0.30)

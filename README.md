@@ -1,14 +1,14 @@
 # mooring-selection
 
-A mooring analysis program used to design moorings for current surveys, based off of Dr. Joseph Park's work on SUBS and TRBM.
-
-## Installation
-
-Download, execute, ..., profit!
+A mooring analysis program written in R, used to design moorings for current surveys. This is based off of Dr. Joseph Park's work on SUBS and TRBM. I am working on enhancing Dr. Park's R code to implement a more robust class structure, and learning R at the same time.
 
 ## Usage
 
-TODO: Write usage instructions
+TODO: write usage
+
+## License
+
+WTFPL, Version 2
 
 ## Credits
 
