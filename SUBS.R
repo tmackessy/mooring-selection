@@ -24,13 +24,13 @@ library(methods)
 #   Shackles, swivels, etc.?
 # TODO(Mackessy-Lloyd): Convert to R Markdown file and develop Shiny front-end.
 # TODO(Mackessy-Lloyd): Migrate from plot to ggplot2. Enhance plots.
+# TODO(Mackessy-Lloyd): Review class validity checks.
 
 #==========================================================
 # Generic class containing slots common to all parts of a SUBS mooring line
 setClass("Element",
          slots = c(name         = "character", # descriptive name
                    buoyancy     = "numeric",   # (N)
-                   currentSpeed = "numeric",   # (knots)
                    lineUpLoad   = "numeric",   # line load above this Element
                    theta        = "numeric",   # vertical angle of lineUpLoad
                    lineDownLoad = "numeric",   # line load below this Element
@@ -146,6 +146,78 @@ setClass("500 LBS",
                           height   =     0.2))
 
 #==========================================================
+# Class containing slots describing environmental conditions and a list of
+#   elements comprising the entire mooring system.
+setClass("Mooring",
+         slots = c(name         = "character", # descriptive name
+                   depth        = "numeric",   # (m)
+                   friction     = "numeric",   #
+                   currentSpeed = "numeric",   # (knots)
+                   elements     = "list"),
+         prototype = list(name         = "Example SUBS System",
+                          depth        = 50.0,
+                          friction     = 0.3,
+                          currentSpeed = seq(from = 0, to = 10, by = 0.5),
+                          elements     = list(
+                            new("A2", name = "A2"),
+                            new("1/4 In Wire", name = "Cable", length = 11.2),
+                            new("Glass Float", name = "Float"),
+                            new("CART", name = "CART"),
+                            new("Chain", name = "Anchor Chain", length = 4.5),
+                            new("Single Railroad", name = "Anchor")
+                          )
+         ),
+         validity = function(object) {
+           errors <- character()
+           
+           if (length(object@name) != 1) {
+             msg <- paste("Mooring must have a name.")
+             errors <- c(errors, msg)
+           }
+           
+           if (object@depth <= 0) {
+             msg <- paste("Deployment depth is ",
+                          object@depth,
+                          ". Must be greater than zero.",
+                          sep = "")
+             errors <- c(errors, msg)
+           }
+           
+           if (object@friction <= 0) {
+             msg <- paste("Bottom friction is ",
+                          object@friction,
+                          ". Must be greater than zero.",
+                          sep = "")
+             errors <- c(errors, msg)
+           }
+           
+           if_component <- c()
+           if_line <- c()
+           if_anchor <- c()
+           for (i in 1:length(object@elements)) {
+             if_component[[i]] <- is(object@elements[[i]], "Component")
+             if_line[[i]]      <- is(object@elements[[i]], "Line")
+             if_anchor[[i]]    <- is(object@elements[[i]], "Anchor")
+           }
+           if (any(if_component)) TRUE else {
+             msg <- paste("Mooring must contain at least one component.")
+             errors <- c(errors, msg)
+           }
+           if (any(if_line)) TRUE else {
+             msg <- paste("Mooring must contain at least one line.")
+             errors <- c(errors, msg)
+           }
+           if (any(if_anchor)) TRUE else {
+             msg <- paste("Mooring must contain at least one anchor.")
+             errors <- c(errors, msg)
+           }
+           
+           if (length(errors) == 0) TRUE else errors
+         }
+)
+
+
+#==========================================================
 # Drag Calculation
 setGeneric("drag",
            valueClass = "numeric",
@@ -156,16 +228,16 @@ setGeneric("drag",
 setMethod("drag",
           signature = "Component",
           function(self) {
-            currentSpeed = self@currentSpeed * 0.514
-            drag = self@dragCoeff * currentSpeed ^ 2
+            currentSpeed <- self@currentSpeed * 1852 / 3600 # Knots to m/s
+            drag <- self@dragCoeff * currentSpeed ^ 2
             return(drag)
             }
           )
 setMethod("drag",
           signature = "Line",
           function(self) {
-            currentSpeed = self@currentSpeed * 0.514
-            drag = self@length * self@dragCoeff * currentSpeed ^ 2
+            currentSpeed <- self@currentSpeed * 1852 / 3600 # Knots to m/s
+            drag <- self@length * self@dragCoeff * currentSpeed ^ 2
             return(drag)
             }
           )
